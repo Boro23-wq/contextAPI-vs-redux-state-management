@@ -1,19 +1,30 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 
-import MainNavigation from '../components/MainNavigation';
-import { removeProductFromCart } from '../store/actions';
-import './Cart.css';
+// importing component
+import NavBar from '../components/NavBar';
 
+// importing context
+import ShopContext from '../context/shop-context';
+
+// importing styles
+import './styles/Cart.css';
+
+// Approach-2 (static contextType => this.context property)
 class CartPage extends Component {
+  static contextType = ShopContext;
+
   render() {
     return (
       <React.Fragment>
-        <MainNavigation cartItemNumber={this.props.cartItemCount} />
-        <main className="cart">
-          {this.props.cartItems.length <= 0 && <p>No Item in the Cart!</p>}
+        <NavBar
+          cartItemNumber={this.context.cart.reduce((count, curItem) => {
+            return count + curItem.quantity;
+          }, 0)}
+        />
+        <main className='cart'>
+          {this.context.cart.length <= 0 && <p>No Item in the Cart!</p>}
           <ul>
-            {this.props.cartItems.map(cartItem => (
+            {this.context.cart.map((cartItem) => (
               <li key={cartItem.id}>
                 <div>
                   <strong>{cartItem.title}</strong> - ${cartItem.price} (
@@ -21,7 +32,7 @@ class CartPage extends Component {
                 </div>
                 <div>
                   <button
-                    onClick={this.props.removeProductFromCart.bind(
+                    onClick={this.context.removeProductFromCart.bind(
                       this,
                       cartItem.id
                     )}
@@ -38,22 +49,4 @@ class CartPage extends Component {
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    cartItems: state.cart,
-    cartItemCount: state.cart.reduce((count, curItem) => {
-      return count + curItem.quantity;
-    }, 0)
-  };
-};
-
-const mapDispatchToProps = dispatch => {
-  return {
-    removeProductFromCart: id => dispatch(removeProductFromCart(id))
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(CartPage);
+export default CartPage;
